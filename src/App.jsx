@@ -624,8 +624,6 @@ body {
 }
 `;
 
-// ─── Icons (inline SVG) ────────────────────────────────────────────────────
-
 const Icon = ({ path, size = 16, ...rest }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...rest}>
@@ -645,7 +643,6 @@ const Icons = {
   loader:  <><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></>,
 };
 
-// ─── Suggestions ──────────────────────────────────────────────────────────────
 const SUGGESTIONS = [
   { label: "AI & ML", text: "What is machine learning?" },
   { label: "NLP",     text: "What is TF-IDF?" },
@@ -653,7 +650,6 @@ const SUGGESTIONS = [
   { label: "Data",    text: "What is the difference between SQL and NoSQL?" },
 ];
 
-// ─── Confidence helpers ───────────────────────────────────────────────────────
 const confColor = (c) => {
   if (c >= 0.6) return "#34d399";
   if (c >= 0.3) return "#fbbf24";
@@ -666,11 +662,10 @@ const confLabel = (c) => {
   return "Low";
 };
 
-// ─── API call ─────────────────────────────────────────────────────────────────
-const BACKEND_URL = (typeof window !== "undefined" &&
-  window._QA_BACKEND_URL) || "http://localhost:8000";
+// ─── THIS IS THE ONLY LINE THAT CHANGED ───────────────────────────────────────
+const BACKEND_URL = "https://qamind-backend.onrender.com";
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Claude API — used when backend is unavailable
 async function askClaude(question, knowledgeContext) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -714,13 +709,12 @@ matched_question: rephrase the user's question cleanly.`,
 }
 
 async function askQuestion(question) {
-  // Try the Python backend first
   try {
     const res = await fetch(`${BACKEND_URL}/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -728,13 +722,11 @@ async function askQuestion(question) {
     }
     return await res.json();
   } catch (backendErr) {
-    // Fallback to Claude API
     console.info("Backend unavailable, using Claude API fallback:", backendErr.message);
     return await askClaude(question);
   }
 }
 
-// ─── Main App ─────────────────────────────────────────────────────────────────
 export default function QAApp() {
   const [theme, setTheme]       = useState("dark");
   const [messages, setMessages] = useState([]);
@@ -748,12 +740,10 @@ export default function QAApp() {
   const textareaRef    = useRef(null);
   const recognitionRef = useRef(null);
 
-  // ── Scroll to bottom ──
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // ── Auto-resize textarea ──
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -761,7 +751,6 @@ export default function QAApp() {
     el.style.height = Math.min(el.scrollHeight, 120) + "px";
   }, []);
 
-  // ── Voice input ──
   const toggleVoice = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return alert("Speech recognition not supported in this browser.");
@@ -786,7 +775,6 @@ export default function QAApp() {
     setListening(true);
   }, [listening, resizeTextarea]);
 
-  // ── Submit ──
   const handleSubmit = useCallback(async (questionText) => {
     const q = (questionText ?? input).trim();
     if (!q || loading) return;
@@ -823,7 +811,6 @@ export default function QAApp() {
     }
   }, [input, loading]);
 
-  // ── Keyboard ──
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -838,8 +825,6 @@ export default function QAApp() {
     <>
       <style>{FONTS}{CSS}</style>
       <div className="app-shell" data-theme={theme}>
-
-        {/* ── History Drawer ── */}
         <div className={`history-panel ${showHistory ? "open" : ""}`} role="dialog" aria-label="Question history">
           <div className="history-header">
             <span className="history-title">History</span>
@@ -878,7 +863,6 @@ export default function QAApp() {
           </div>
         </div>
 
-        {/* ── Header ── */}
         <header className="header" role="banner">
           <div className="logo-area">
             <div className="logo-icon" aria-hidden="true">🧠</div>
@@ -886,7 +870,7 @@ export default function QAApp() {
           </div>
           <div className="kb-badge">
             <span className="kb-dot" aria-hidden="true" />
-            25 topics
+            75 topics
           </div>
           <div className="header-actions">
             {messages.length > 0 && (
@@ -907,7 +891,6 @@ export default function QAApp() {
           </div>
         </header>
 
-        {/* ── Messages ── */}
         <main className="messages-area" role="main" aria-live="polite" aria-label="Conversation">
           {messages.length === 0 ? (
             <div className="welcome" role="region" aria-label="Welcome">
@@ -952,7 +935,6 @@ export default function QAApp() {
                   )}
                   <div className={`msg-bubble ${msg.error ? "error-bubble" : ""}`}>
                     {msg.content}
-
                     {msg.role === "assistant" && !msg.error && msg.confidence != null && (
                       <>
                         <div className="confidence-bar-wrap" aria-label={`Confidence: ${Math.round(msg.confidence * 100)}%`}>
@@ -1009,7 +991,6 @@ export default function QAApp() {
           <div ref={messagesEndRef} aria-hidden="true" />
         </main>
 
-        {/* ── Input ── */}
         <footer className="input-area" role="contentinfo">
           <div className="input-row">
             <textarea

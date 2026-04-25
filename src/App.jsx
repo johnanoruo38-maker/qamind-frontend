@@ -70,24 +70,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Watermark ── */
-.watermark {
-  position: fixed;
-  bottom: 50%;
-  left: 50%;
-  transform: translate(-50%, 50%);
-  font-family: var(--font-head);
-  font-size: clamp(2.5rem, 10vw, 7rem);
-  font-weight: 800;
-  color: var(--text);
-  opacity: 0.03;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  z-index: 0;
-  letter-spacing: -.02em;
-}
-
 /* ── Layout ── */
 .app-shell {
   display: flex;
@@ -112,6 +94,7 @@ body {
   top: 0;
   z-index: 50;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .logo-area {
@@ -141,6 +124,24 @@ body {
   color: var(--text);
 }
 .logo-text span { color: var(--accent); }
+
+/* ── Name Badge ── */
+.name-badge {
+  font-family: var(--font-head);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid rgba(108,143,255,.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: .01em;
+}
 
 .header-actions {
   display: flex;
@@ -185,7 +186,7 @@ body {
   padding: 3px 10px;
   display: none;
 }
-@media (min-width: 480px) { .kb-badge { display: flex; align-items: center; gap: 5px; } }
+@media (min-width: 600px) { .kb-badge { display: flex; align-items: center; gap: 5px; } }
 .kb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block; }
 
 /* ── Messages ── */
@@ -253,6 +254,20 @@ body {
   max-width: 380px;
   line-height: 1.6;
   font-weight: 400;
+}
+
+.welcome-name {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid rgba(108,143,255,.25);
+  border-radius: 20px;
+  padding: 5px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .suggestion-grid {
@@ -718,13 +733,13 @@ export default function QAApp() {
   const textareaRef    = useRef(null);
   const recognitionRef = useRef(null);
 
-  // ── Fix 1: Apply theme to html element so body background changes ──
+  // Apply theme to html element so entire page background changes
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     document.body.style.background = "var(--bg)";
   }, [theme]);
 
-  // ── Fix 3: Set browser tab title to "QA" ──
+  // Set browser tab title to QA
   useEffect(() => {
     document.title = "QA — QAMind";
   }, []);
@@ -812,9 +827,6 @@ export default function QAApp() {
     <>
       <style>{FONTS}{CSS}</style>
 
-      {/* ── Fix 3: Watermark with your name ── */}
-      <div className="watermark" aria-hidden="true">{YOUR_NAME}</div>
-
       <div className="app-shell">
 
         {/* History Drawer */}
@@ -855,10 +867,17 @@ export default function QAApp() {
             <div className="logo-icon" aria-hidden="true">🧠</div>
             <span className="logo-text">QA<span>Mind</span></span>
           </div>
+
+          {/* ── Your name visibly in header ── */}
+          <div className="name-badge" aria-label="Created by">
+            👤 {YOUR_NAME}
+          </div>
+
           <div className="kb-badge">
             <span className="kb-dot" aria-hidden="true" />
             75 topics + AI
           </div>
+
           <div className="header-actions">
             {messages.length > 0 && (
               <button className="icon-btn" onClick={clearChat} aria-label="Clear conversation">
@@ -883,8 +902,14 @@ export default function QAApp() {
               <div className="welcome-orb" aria-hidden="true">🧠</div>
               <h1 className="welcome-title">Ask anything about<br/><span>tech & AI</span></h1>
               <p className="welcome-sub">
-                Powered by TF-IDF retrieval + AI. Ask about machine learning, NLP, APIs, science, history, databases, DevOps, and more.
+                Powered by TF-IDF retrieval + Wikipedia. Ask about machine learning, NLP, science, history, databases, DevOps, and more.
               </p>
+
+              {/* Name also shown on welcome screen */}
+              <div className="welcome-name">
+                👤 {YOUR_NAME}
+              </div>
+
               <div className="suggestion-grid" role="list">
                 {SUGGESTIONS.map((s, i) => (
                   <button key={i} className="suggestion-chip" role="listitem"
@@ -905,8 +930,11 @@ export default function QAApp() {
                     <div className="msg-meta">
                       <div className="avatar" aria-hidden="true">🧠</div>
                       QAMind
-                      {msg.source === "ai" && (
-                        <span style={{ color: "var(--accent)", fontSize: "0.65rem" }}>· AI</span>
+                      {msg.source === "wikipedia" && (
+                        <span style={{ color: "var(--accent)", fontSize: "0.65rem" }}>· Wikipedia</span>
+                      )}
+                      {msg.source === "duckduckgo" && (
+                        <span style={{ color: "var(--accent)", fontSize: "0.65rem" }}>· DuckDuckGo</span>
                       )}
                     </div>
                   )}

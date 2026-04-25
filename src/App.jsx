@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-// ─── Inline styles (no Tailwind needed – pure CSS-in-JSX) ──────────────────
+// ── Change this to your name ──────────────────────────────────────────────────
+const YOUR_NAME = "Bright Princewill Munachimso 20231362805";
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BACKEND_URL = "https://qamind-backend.onrender.com";
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
@@ -33,7 +37,7 @@ const CSS = `
   --transition:  0.2s cubic-bezier(.4,0,.2,1);
 }
 
-[data-theme="light"] {
+html[data-theme="light"] {
   --bg:          #f0f2f8;
   --surface:     #ffffff;
   --surface2:    #f7f8fc;
@@ -43,20 +47,45 @@ const CSS = `
   --accent2:     #7c3aed;
   --accent-glow: rgba(74,110,245,.12);
   --text:        #1a1d2e;
-  --text2:       #5a5e78;
-  --text3:       #9095b0;
+  --text2:       #3a3e55;
+  --text3:       #606580;
+  --success:     #059669;
+  --warn:        #d97706;
+  --error:       #dc2626;
   --shadow:      0 4px 24px rgba(0,0,0,.08);
   --shadow-lg:   0 8px 48px rgba(0,0,0,.12);
+}
+
+html, body {
+  background: var(--bg);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* ── Watermark ── */
+.watermark {
+  position: fixed;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  font-family: var(--font-head);
+  font-size: clamp(2.5rem, 10vw, 7rem);
+  font-weight: 800;
+  color: var(--text);
+  opacity: 0.03;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+  letter-spacing: -.02em;
 }
 
 /* ── Layout ── */
@@ -67,6 +96,7 @@ body {
   max-width: 860px;
   margin: 0 auto;
   position: relative;
+  z-index: 1;
 }
 
 /* ── Header ── */
@@ -110,9 +140,7 @@ body {
   letter-spacing: -.01em;
   color: var(--text);
 }
-.logo-text span {
-  color: var(--accent);
-}
+.logo-text span { color: var(--accent); }
 
 .header-actions {
   display: flex;
@@ -150,7 +178,7 @@ body {
   font-family: var(--font-body);
   font-size: 0.7rem;
   font-weight: 500;
-  color: var(--text3);
+  color: var(--text2);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -211,8 +239,9 @@ body {
   font-weight: 800;
   letter-spacing: -.03em;
   line-height: 1.1;
+  color: var(--text);
 }
-.welcome-title span { 
+.welcome-title span {
   background: linear-gradient(120deg, var(--accent), var(--accent2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -223,7 +252,7 @@ body {
   color: var(--text2);
   max-width: 380px;
   line-height: 1.6;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .suggestion-grid {
@@ -283,11 +312,12 @@ body {
 
 .msg-meta {
   font-size: 0.68rem;
-  color: var(--text3);
+  color: var(--text2);
   padding: 0 4px;
   display: flex;
   align-items: center;
   gap: 6px;
+  font-weight: 500;
 }
 .msg-meta .avatar {
   width: 18px;
@@ -311,7 +341,7 @@ body {
 
 .msg-wrapper.user .msg-bubble {
   background: linear-gradient(135deg, var(--accent), #5a7ef0);
-  color: #fff;
+  color: #ffffff;
   border-bottom-right-radius: 4px;
   box-shadow: 0 2px 16px rgba(108,143,255,.25);
 }
@@ -327,6 +357,7 @@ body {
 .msg-wrapper.assistant .msg-bubble.error-bubble {
   border-color: rgba(248,113,113,.3);
   background: rgba(248,113,113,.06);
+  color: var(--error);
 }
 
 /* ── Confidence badge ── */
@@ -341,7 +372,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .05em;
-  color: var(--text3);
+  color: var(--text2);
   white-space: nowrap;
 }
 .confidence-track {
@@ -365,7 +396,7 @@ body {
 .matched-q {
   margin-top: 8px;
   font-size: 0.72rem;
-  color: var(--text3);
+  color: var(--text2);
   font-style: italic;
   border-left: 2px solid var(--border2);
   padding-left: 8px;
@@ -443,6 +474,7 @@ body {
   font-family: var(--font-head);
   font-size: 1rem;
   font-weight: 700;
+  color: var(--text);
 }
 .history-list {
   flex: 1;
@@ -488,7 +520,7 @@ body {
   justify-content: center;
   flex-direction: column;
   gap: 8px;
-  color: var(--text3);
+  color: var(--text2);
   font-size: 0.85rem;
 }
 
@@ -545,7 +577,7 @@ body {
   border-radius: 9px;
   border: 1px solid var(--border2);
   background: transparent;
-  color: var(--text3);
+  color: var(--text2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -593,15 +625,13 @@ body {
   cursor: not-allowed;
   box-shadow: none;
 }
-.send-btn.loading {
-  animation: spin 1s linear infinite;
-}
+.send-btn.loading { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .input-hint {
   margin-top: 6px;
   font-size: 0.68rem;
-  color: var(--text3);
+  color: var(--text2);
   text-align: center;
   padding: 0 4px;
 }
@@ -610,7 +640,7 @@ body {
 .date-divider {
   text-align: center;
   font-size: 0.68rem;
-  color: var(--text3);
+  color: var(--text2);
   position: relative;
   display: flex;
   align-items: center;
@@ -638,16 +668,15 @@ const Icons = {
   history: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
   close:   <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
   mic:     <><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>,
-  bot:     <><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></>,
   trash:   <><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></>,
   loader:  <><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></>,
 };
 
 const SUGGESTIONS = [
-  { label: "AI & ML", text: "What is machine learning?" },
-  { label: "NLP",     text: "What is TF-IDF?" },
-  { label: "Backend", text: "What is FastAPI?" },
-  { label: "Data",    text: "What is the difference between SQL and NoSQL?" },
+  { label: "AI & ML",  text: "What is machine learning?" },
+  { label: "NLP",      text: "What is TF-IDF?" },
+  { label: "Backend",  text: "What is FastAPI?" },
+  { label: "Data",     text: "What is the difference between SQL and NoSQL?" },
 ];
 
 const confColor = (c) => {
@@ -662,83 +691,43 @@ const confLabel = (c) => {
   return "Low";
 };
 
-// ─── THIS IS THE ONLY LINE THAT CHANGED ───────────────────────────────────────
-const BACKEND_URL = "https://qamind-backend.onrender.com";
-// ─────────────────────────────────────────────────────────────────────────────
-
-async function askClaude(question, knowledgeContext) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+async function askQuestion(question) {
+  const res = await fetch(`${BACKEND_URL}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system: `You are a precise Q&A assistant. Answer concisely (2-4 sentences max) based on this knowledge base context. Always respond with valid JSON only, no markdown.
-
-Knowledge Base Topics: Machine Learning, Deep Learning, Neural Networks, NLP, TF-IDF, Cosine Similarity, Tokenization, Stop Words, Python, FastAPI, React, REST APIs, Docker, Git, CI/CD, Databases, SQL, NoSQL, Cloud Computing, Kubernetes, CORS, scikit-learn, Transformers, BERT.
-
-Respond ONLY with this JSON (no backticks):
-{"answer":"...","confidence":0.85,"category":"ai_ml","matched_question":"..."}
-
-confidence: 0.0-1.0 based on how well you can answer from the knowledge base.
-category: one of [ai_ml, nlp, programming, devops, data, cloud, general]
-matched_question: rephrase the user's question cleanly.`,
-      messages: [{ role: "user", content: question }],
-    }),
+    body: JSON.stringify({ question }),
+    signal: AbortSignal.timeout(15000),
   });
-  const data = await res.json();
-  const text = data.content?.find(b => b.type === "text")?.text || "{}";
-  try {
-    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
-    return {
-      answer: parsed.answer || "I couldn't find a confident answer for that question.",
-      confidence: parsed.confidence ?? 0.5,
-      category: parsed.category ?? "general",
-      matched_question: parsed.matched_question ?? question,
-      source: "claude_api",
-    };
-  } catch {
-    return {
-      answer: text,
-      confidence: 0.5,
-      category: "general",
-      matched_question: question,
-      source: "claude_api",
-    };
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `HTTP ${res.status}`);
   }
-}
-
-async function askQuestion(question) {
-  try {
-    const res = await fetch(`${BACKEND_URL}/ask`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question }),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || `HTTP ${res.status}`);
-    }
-    return await res.json();
-  } catch (backendErr) {
-    console.info("Backend unavailable, using Claude API fallback:", backendErr.message);
-    return await askClaude(question);
-  }
+  return await res.json();
 }
 
 export default function QAApp() {
-  const [theme, setTheme]       = useState("dark");
-  const [messages, setMessages] = useState([]);
-  const [input, setInput]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [theme, setTheme]             = useState("dark");
+  const [messages, setMessages]       = useState([]);
+  const [input, setInput]             = useState("");
+  const [loading, setLoading]         = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [history, setHistory]   = useState([]);
-  const [listening, setListening] = useState(false);
+  const [history, setHistory]         = useState([]);
+  const [listening, setListening]     = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef    = useRef(null);
   const recognitionRef = useRef(null);
+
+  // ── Fix 1: Apply theme to html element so body background changes ──
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.body.style.background = "var(--bg)";
+  }, [theme]);
+
+  // ── Fix 3: Set browser tab title to "QA" ──
+  useEffect(() => {
+    document.title = "QA — QAMind";
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -768,7 +757,7 @@ export default function QAApp() {
       setInput(prev => prev ? prev + " " + transcript : transcript);
       setTimeout(resizeTextarea, 0);
     };
-    rec.onend = () => setListening(false);
+    rec.onend  = () => setListening(false);
     rec.onerror = () => setListening(false);
     rec.start();
     recognitionRef.current = rec;
@@ -779,15 +768,14 @@ export default function QAApp() {
     const q = (questionText ?? input).trim();
     if (!q || loading) return;
 
-    const userMsg = { role: "user", content: q, id: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(prev => [...prev, { role: "user", content: q, id: Date.now() }]);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setLoading(true);
 
     try {
       const data = await askQuestion(q);
-      const botMsg = {
+      setMessages(prev => [...prev, {
         role: "assistant",
         content: data.answer,
         confidence: data.confidence,
@@ -795,8 +783,7 @@ export default function QAApp() {
         matched_question: data.matched_question,
         source: data.source,
         id: Date.now() + 1,
-      };
-      setMessages(prev => [...prev, botMsg]);
+      }]);
       setHistory(prev => [{ question: q, answer: data.answer }, ...prev.slice(0, 49)]);
     } catch (err) {
       setMessages(prev => [...prev, {
@@ -824,7 +811,13 @@ export default function QAApp() {
   return (
     <>
       <style>{FONTS}{CSS}</style>
-      <div className="app-shell" data-theme={theme}>
+
+      {/* ── Fix 3: Watermark with your name ── */}
+      <div className="watermark" aria-hidden="true">{YOUR_NAME}</div>
+
+      <div className="app-shell">
+
+        {/* History Drawer */}
         <div className={`history-panel ${showHistory ? "open" : ""}`} role="dialog" aria-label="Question history">
           <div className="history-header">
             <span className="history-title">History</span>
@@ -846,16 +839,9 @@ export default function QAApp() {
                 <span>No history yet</span>
               </div>
             ) : history.map((item, i) => (
-              <button
-                key={i}
-                className="history-item"
-                role="listitem"
-                onClick={() => {
-                  setShowHistory(false);
-                  handleSubmit(item.question);
-                }}
-                aria-label={`Ask again: ${item.question}`}
-              >
+              <button key={i} className="history-item" role="listitem"
+                onClick={() => { setShowHistory(false); handleSubmit(item.question); }}
+                aria-label={`Ask again: ${item.question}`}>
                 <div className="history-item-q">{item.question}</div>
                 <div className="history-item-a">{item.answer}</div>
               </button>
@@ -863,6 +849,7 @@ export default function QAApp() {
           </div>
         </div>
 
+        {/* Header */}
         <header className="header" role="banner">
           <div className="logo-area">
             <div className="logo-icon" aria-hidden="true">🧠</div>
@@ -870,7 +857,7 @@ export default function QAApp() {
           </div>
           <div className="kb-badge">
             <span className="kb-dot" aria-hidden="true" />
-            75 topics
+            75 topics + AI
           </div>
           <div className="header-actions">
             {messages.length > 0 && (
@@ -878,36 +865,30 @@ export default function QAApp() {
                 <Icon path={Icons.trash} size={15} />
               </button>
             )}
-            <button
-              className={`icon-btn ${showHistory ? "active" : ""}`}
-              onClick={() => setShowHistory(true)}
-              aria-label="View history"
-            >
+            <button className={`icon-btn ${showHistory ? "active" : ""}`}
+              onClick={() => setShowHistory(true)} aria-label="View history">
               <Icon path={Icons.history} size={15} />
             </button>
-            <button className="icon-btn" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+            <button className="icon-btn" onClick={toggleTheme}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
               <Icon path={theme === "dark" ? Icons.sun : Icons.moon} size={15} />
             </button>
           </div>
         </header>
 
-        <main className="messages-area" role="main" aria-live="polite" aria-label="Conversation">
+        {/* Messages */}
+        <main className="messages-area" role="main" aria-live="polite">
           {messages.length === 0 ? (
             <div className="welcome" role="region" aria-label="Welcome">
               <div className="welcome-orb" aria-hidden="true">🧠</div>
               <h1 className="welcome-title">Ask anything about<br/><span>tech & AI</span></h1>
               <p className="welcome-sub">
-                Powered by TF-IDF retrieval + Claude fallback. Ask about machine learning, NLP, APIs, databases, DevOps, and more.
+                Powered by TF-IDF retrieval + AI. Ask about machine learning, NLP, APIs, science, history, databases, DevOps, and more.
               </p>
-              <div className="suggestion-grid" role="list" aria-label="Suggested questions">
+              <div className="suggestion-grid" role="list">
                 {SUGGESTIONS.map((s, i) => (
-                  <button
-                    key={i}
-                    className="suggestion-chip"
-                    role="listitem"
-                    onClick={() => handleSubmit(s.text)}
-                    aria-label={`Ask: ${s.text}`}
-                  >
+                  <button key={i} className="suggestion-chip" role="listitem"
+                    onClick={() => handleSubmit(s.text)} aria-label={`Ask: ${s.text}`}>
                     <strong>{s.label}</strong>
                     {s.text}
                   </button>
@@ -918,18 +899,14 @@ export default function QAApp() {
             <>
               <div className="date-divider" aria-hidden="true">Today</div>
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`msg-wrapper ${msg.role}`}
-                  role="article"
-                  aria-label={msg.role === "user" ? "Your question" : "Answer"}
-                >
+                <div key={msg.id} className={`msg-wrapper ${msg.role}`}
+                  role="article" aria-label={msg.role === "user" ? "Your question" : "Answer"}>
                   {msg.role === "assistant" && (
                     <div className="msg-meta">
                       <div className="avatar" aria-hidden="true">🧠</div>
                       QAMind
-                      {msg.source === "claude_api" && (
-                        <span style={{ color: "var(--accent)", fontSize: "0.65rem" }}>· Claude</span>
+                      {msg.source === "ai" && (
+                        <span style={{ color: "var(--accent)", fontSize: "0.65rem" }}>· AI</span>
                       )}
                     </div>
                   )}
@@ -937,38 +914,29 @@ export default function QAApp() {
                     {msg.content}
                     {msg.role === "assistant" && !msg.error && msg.confidence != null && (
                       <>
-                        <div className="confidence-bar-wrap" aria-label={`Confidence: ${Math.round(msg.confidence * 100)}%`}>
+                        <div className="confidence-bar-wrap">
                           <span className="confidence-label">Confidence</span>
                           <div className="confidence-track">
-                            <div
-                              className="confidence-fill"
-                              style={{
-                                width: `${Math.round(msg.confidence * 100)}%`,
-                                background: confColor(msg.confidence),
-                              }}
-                            />
+                            <div className="confidence-fill" style={{
+                              width: `${Math.round(msg.confidence * 100)}%`,
+                              background: confColor(msg.confidence),
+                            }} />
                           </div>
                           <span className="conf-value" style={{ color: confColor(msg.confidence) }}>
                             {confLabel(msg.confidence)} · {Math.round(msg.confidence * 100)}%
                           </span>
                         </div>
                         {msg.category && (
-                          <span className="category-tag">
-                            # {msg.category.replace("_", " ")}
-                          </span>
+                          <span className="category-tag"># {msg.category.replace("_", " ")}</span>
                         )}
                         {msg.matched_question && (
-                          <div className="matched-q">
-                            Matched: "{msg.matched_question}"
-                          </div>
+                          <div className="matched-q">Matched: "{msg.matched_question}"</div>
                         )}
                       </>
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="msg-meta" style={{ justifyContent: "flex-end" }}>
-                      You
-                    </div>
+                    <div className="msg-meta" style={{ justifyContent: "flex-end" }}>You</div>
                   )}
                 </div>
               ))}
@@ -991,36 +959,24 @@ export default function QAApp() {
           <div ref={messagesEndRef} aria-hidden="true" />
         </main>
 
+        {/* Input */}
         <footer className="input-area" role="contentinfo">
           <div className="input-row">
-            <textarea
-              ref={textareaRef}
-              className="qa-textarea"
-              value={input}
+            <textarea ref={textareaRef} className="qa-textarea" value={input}
               onChange={(e) => { setInput(e.target.value); resizeTextarea(); }}
               onKeyDown={handleKeyDown}
-              placeholder="Ask a question… (Enter to send)"
-              rows={1}
-              aria-label="Type your question"
-              aria-multiline="true"
-              disabled={loading}
-              maxLength={500}
-            />
+              placeholder="Ask anything… (Enter to send)"
+              rows={1} aria-label="Type your question"
+              disabled={loading} maxLength={500} />
             <div className="input-actions">
-              <button
-                className={`mic-btn ${listening ? "listening" : ""}`}
+              <button className={`mic-btn ${listening ? "listening" : ""}`}
                 onClick={toggleVoice}
-                aria-label={listening ? "Stop listening" : "Start voice input"}
-                title="Voice input"
-              >
+                aria-label={listening ? "Stop listening" : "Start voice input"}>
                 <Icon path={Icons.mic} size={14} />
               </button>
-              <button
-                className={`send-btn ${loading ? "loading" : ""}`}
+              <button className={`send-btn ${loading ? "loading" : ""}`}
                 onClick={() => handleSubmit()}
-                disabled={!input.trim() || loading}
-                aria-label="Send question"
-              >
+                disabled={!input.trim() || loading} aria-label="Send question">
                 <Icon path={loading ? Icons.loader : Icons.send} size={14} />
               </button>
             </div>
